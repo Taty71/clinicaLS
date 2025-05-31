@@ -1,0 +1,78 @@
+.inicio-container {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #f5f6fa;
+}
+
+
+h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 15px auto;
+  text-align: center;
+}
+
+.botones {
+  display: flex;
+  gap: 20px;
+}
+
+.botones button {
+  padding: 12px 32px;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 6px;
+  background: #213547;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.botones button:hover {
+  background: #125ea2;
+}
+.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Arriba en vez de centro vertical */
+  min-height: 60vh;            /* Menor altura mínima */
+  margin-top: 40px;            /* Espacio desde arriba */
+  box-shadow: 0 2px 12px #b0c4de33;
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px 24px 24px 24px;
+  width: 100%;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  overflow: visible;           /* Evita scroll interno */
+}
+.volver-btn {
+  position: absolute;
+  top: 250px;
+  right: 30px;
+  padding: 6px 16px 6px 36px; /* espacio para el icono */
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 6px;
+  background: #b0c4de;
+  color: #213547;
+  cursor: pointer;
+  transition: background 0.2s;
+  z-index: 1000;
+  background-image: url('./assets/volver.png');
+  background-repeat: no-repeat;
+  background-size: 20px 20px;
+  background-position: 10px center;
+}
+
+.volver-btn:hover {
+  background: #e9ecef;
+  color: #213547;
+}
+/* Puedes agregar esto al final de App.css */
