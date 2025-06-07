@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import FormProfesional from "../componentes/FormProfesional";
 import "../estilos/ProfesionalesCRUD.css";
 import VolverBtn from "../componentes/VolverBtn";
-
-
+import Mensaje from "../componentes/Mensaje"; // Importa el componente
+import AyudaProfesionales from "../componentes/AyudaProfesionales";
+import ListaProfesionales from "../componentes/ListaProfesionales";
 function ProfesionalesCRUD({ onVolver }) {
   const [profesionales, setProfesionales] = useState([]);
   const [form, setForm] = useState({
@@ -11,7 +12,16 @@ function ProfesionalesCRUD({ onVolver }) {
     telefono: "", email: "", tipoContrato: "", diasHorarios: "", rol: "Médico/a"
   });
   const [editId, setEditId] = useState(null);
+  const [mensaje, setMensaje] = useState(null); // Estado para el mensaje
+  const [showAyuda, setShowAyuda] = useState(false);
+  const [verLista, setVerLista] = useState(false);
 
+   useEffect(() => {
+    if (mensaje) {
+      const timer = setTimeout(() => setMensaje(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [mensaje]);
 
 
   // Obtener la lista
@@ -54,13 +64,17 @@ function ProfesionalesCRUD({ onVolver }) {
         telefono: "", email: "", tipoContrato: "", diasHorarios: "", rol: "Médico/a"
       });
       setEditId(null);
+      setMensaje({ tipo: "exito", texto: editId ? "¡Profesional Actualizado correctamente!" : "¡Profesional Registrado correctamente!" }); // Mensaje
+
        return true;
     } else {
-      alert(data.error || data.detalle || "Error");
+      setMensaje({ tipo: "error", texto: data.error || data.detalle || "Error" });
+
       return false;
     }
   } catch {
-    // alert("Error de red");
+    setMensaje({ tipo: "error", texto: "Error de red" });
+
     return false; // <--- ¡IMPORTANTE!
   }
 };
@@ -69,17 +83,25 @@ function ProfesionalesCRUD({ onVolver }) {
   // Baja lógica: marcar como inactivo en vez de eliminar físicamente
   const handleDelete = async (id) => {
     if (!window.confirm("¿Seguro que deseas dar de baja este profesional?")) return;
-    await fetch(`/api/profesionales/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-      body: JSON.stringify({ activo: false }),
-    });
-    fetchProfesionales();
+    try {
+      const res = await fetch(`/api/profesionales/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+        body: JSON.stringify({ activo: false }),
+      });
+      if (res.ok) {
+        setMensaje({ tipo: "exito", texto: "¡Profesional dado de baja correctamente, quedando desactivo!" });
+        fetchProfesionales();
+      } else {
+        setMensaje({ tipo: "error", texto: "No se pudo dar de baja el profesional." });
+      }
+    } catch {
+      setMensaje({ tipo: "error", texto: "Error de red al eliminar." });
+    }
   };
-
   // Editar profesional (cargar datos en el form)
   const handleEdit = (prof) => {
     setForm({
@@ -99,8 +121,33 @@ function ProfesionalesCRUD({ onVolver }) {
 
   return (
     <div>
+       {!verLista ? (
+        <>
       <h2>Profesionales</h2>
       <VolverBtn onClick={onVolver} />
+      <button
+        className="btn-ayuda"
+        style={{ marginBottom: 16, float: "right" }}
+        onClick={() => setShowAyuda(true)}
+      >
+        🛈 Ayuda
+      </button>
+      <AyudaProfesionales visible={showAyuda} onClose={() => setShowAyuda(false)} />
+     
+      {/* Mensaje flotante abajo a la derecha */}
+          {mensaje && (
+            <div style={{
+              position: "fixed",
+              right: 24,
+              bottom: 200,
+              zIndex: 1000,
+              minWidth: 300,
+              maxWidth: 400
+            }}>
+              <Mensaje tipo={mensaje.tipo}>{mensaje.texto}</Mensaje>
+            </div>
+          )}
+
       <FormProfesional
         form={form}
         setForm={setForm}
@@ -115,8 +162,17 @@ function ProfesionalesCRUD({ onVolver }) {
           });
       }}
       onVolver={onVolver}
+      setMensaje={setMensaje} 
       />
-      <div className="prof-list">
+      <button
+            className="btn-ver-lista"
+            style={{ marginTop: 16 }}
+            onClick={() => setVerLista(true)}
+          >
+            Ver lista de profesionales
+          </button>
+
+          <div className="prof-list">
          
           {(Array.isArray(profesionales) ? profesionales : []).map(prof => (
             <div className="prof-card" key={prof._id}>
@@ -136,6 +192,15 @@ function ProfesionalesCRUD({ onVolver }) {
             </div>
           ))}
         </div>
+        </>
+      ) : (
+        <ListaProfesionales
+          profesionales={profesionales}
+          onVolver={() => setVerLista(false)}
+        />
+      )}
+
+      
           
     </div>
   );

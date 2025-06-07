@@ -5,19 +5,19 @@ import VolverBtn from "./VolverBtn";
 
 
 
-function FormProfesional({ form, setForm, onSubmit, editId, onCancel, onVolver}) {
+function FormProfesional({ form, setForm, onSubmit, editId, onCancel, onVolver, setMensaje }) {
   const [errores, setErrores] = useState({});
-  const [mensaje, setMensaje] = useState(null);
+
 
   useEffect(() => {
   setErrores({});
-  setMensaje(null);
-}, [form, editId]);
+
+  }, [form, editId]);
 
 const handleChange = e => {
   setForm(f => ({ ...f, [e.target.name]: e.target.value }));
   setErrores({ ...errores, [e.target.name]: "" });
-  setMensaje(null);
+ 
 };
 
 const handleSubmit = async e => {
@@ -26,26 +26,26 @@ const handleSubmit = async e => {
     await profesionalSchema.validate(form, { abortEarly: false });
     // Validación de unicidad (AJAX al backend)
     let url = (`/api/profesionales/exists?dni=${form.dni}&matricula=${form.matricula}`);
-    if (editId) {
-      url += `&id=${editId}`;
-    }
+     if (editId) url += `&id=${editId}`;
+      
+    
     const res = await fetch(url);
     const data = await res.json();
     if (data.dniExiste) {
       setErrores(prev => ({ ...prev, dni: "El DNI ya está registrado" }));
+        setMensaje && setMensaje({ tipo: "error", texto: "DNI O MATRICULA EXISTENTE" });
+
       return;
     }
     if (data.matriculaExiste) {
       setErrores(prev => ({ ...prev, matricula: "La matrícula ya está registrada" }));
+        setMensaje && setMensaje({ tipo: "error", texto: "DNI O MATRICULA EXISTENTE" });
+
       return;
     }
 
-    const exito = await onSubmit(); // onSubmit debe devolver true/false según éxito
-    if (exito) {
-      setMensaje({ tipo: "exito", texto: editId ? "¡Actualizado correctamente!" : "¡Registrado correctamente!" });
-    } else {
-      setMensaje({ tipo: "error", texto: "Ocurrió un error al guardar." });
-    }
+    await onSubmit(); // onSubmit debe devolver true/false según éxito
+    
   } catch (validationError) {
     if (validationError.inner) {
       const nuevoErrores = {};
@@ -54,7 +54,7 @@ const handleSubmit = async e => {
       });
       setErrores(nuevoErrores);
     }
-    setMensaje({ tipo: "error", texto: "Corrige los errores del formulario." });
+      setMensaje && setMensaje({ tipo: "error", texto: "Corrige los errores del formulario." });
 
   }
 };
@@ -62,7 +62,6 @@ const handleSubmit = async e => {
   return (
     <>
     <form onSubmit={handleSubmit} style={{ marginBottom: 24 }} className="form-grid">
-       {mensaje && <Mensaje tipo={mensaje.tipo}>{mensaje.texto}</Mensaje>}
   
       <div className="form-group">
         <label>Nombre:</label>
