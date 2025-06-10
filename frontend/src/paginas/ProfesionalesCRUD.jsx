@@ -118,7 +118,26 @@ function ProfesionalesCRUD({ onVolver }) {
     });
     setEditId(prof._id);
   };
-
+  const handleActivar = async (id) => {
+  if (!window.confirm("¿Seguro que deseas activar este profesional?")) return;
+  try {
+    const res = await fetch(`/api/profesionales/activar/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+    if (res.ok) {
+      setMensaje({ tipo: "exito", texto: "¡Profesional activado correctamente!" });
+      fetchProfesionales();
+    } else {
+      setMensaje({ tipo: "error", texto: "No se pudo activar el profesional." });
+    }
+  } catch {
+    setMensaje({ tipo: "error", texto: "Error de red al activar." });
+  }
+};
   return (
     <div>
        {!verLista ? (
@@ -174,8 +193,8 @@ function ProfesionalesCRUD({ onVolver }) {
 
           <div className="prof-list">
          
-          {(Array.isArray(profesionales) ? profesionales : []).map(prof => (
-            <div className="prof-card" key={prof._id}>
+           {(Array.isArray(profesionales) ? profesionales.filter(p => p.activo !== false) : []).map(prof => (
+             <div className="prof-card" key={prof._id}>
               <h3>{prof.nombre} {prof.apellido}</h3>
               <p><strong>DNI:</strong> {prof.dni}</p>
               <p><strong>Matrícula:</strong> {prof.matricula}</p>
@@ -187,7 +206,7 @@ function ProfesionalesCRUD({ onVolver }) {
               <p><strong>Rol:</strong> {prof.rol}</p>
               <div className="card-buttons">
                 <button className="btn-edit" onClick={() => handleEdit(prof)}>✏️ Editar</button>
-                <button className="btn-delete" onClick={() => handleDelete(prof._id)}>🗑️ Eliminar</button>
+                <button className="btn-delete" onClick={() => handleDelete(prof._id)}>🗑️ Desactivar</button>
               </div>
             </div>
           ))}
@@ -197,6 +216,7 @@ function ProfesionalesCRUD({ onVolver }) {
         <ListaProfesionales
           profesionales={profesionales}
           onVolver={() => setVerLista(false)}
+          onActivar={handleActivar}
         />
       )}
 

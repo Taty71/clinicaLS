@@ -6,7 +6,7 @@ import { proteger, permisoRol } from "../middleware/authMiddleware.js";
 const router = Router();
 
 router.get('/', proteger, permisoRol('Admin'), async (req, res)  => {
-  const profesionales = await Profesional.find({ activo: true });
+  const profesionales = await Profesional.find(); // Quita { activo: true }
   res.json(profesionales);
 });
 
@@ -97,7 +97,19 @@ router.put('/:id', proteger, permisoRol('Admin'), async (req, res) => {
 
 router.delete('/:id', proteger, permisoRol('Admin'), async (req, res) => {
   await Profesional.findByIdAndUpdate(req.params.id, { activo: false });
-  res.json({ message: 'Profesional dado de baja' });
+  res.json({ message: 'Profesional dado desactivado' });
 });
-
+router.put('/activar/:id', proteger, permisoRol('Admin'), async (req, res) => {
+  try {
+    const profesional = await Profesional.findByIdAndUpdate(
+      req.params.id,
+      { activo: true },
+      { new: true }
+    );
+    if (!profesional) return res.status(404).json({ error: "No encontrado" });
+    res.json({ mensaje: "Profesional activado", profesional });
+  } catch (error) {
+    res.status(500).json({ error: "Error al activar profesional" });
+  }
+});
 export default router;

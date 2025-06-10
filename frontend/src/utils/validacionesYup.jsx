@@ -52,9 +52,9 @@ export const profesionalSchema = yup.object().shape({
     .required("El apellido es obligatorio"),
   dni: yup
     .string()
-    .matches(/^\d+$/, "Solo números")
-    .min(7, "DNI inválido")
-    .max(10, "DNI inválido")
+   .matches(/^\d{7,8}$/, "DNI inválido")
+    //.min(7, "DNI inválido")
+    //.max(10, "DNI inválido")
     .required("El DNI es obligatorio"),
   matricula: yup
   .string()

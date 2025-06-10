@@ -15,7 +15,7 @@ function FormProfesional({ form, setForm, onSubmit, editId, onCancel, onVolver, 
   }, [form, editId]);
 
 const handleChange = e => {
-  setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+  setForm(f => ({ ...f, [e.target.name]: e.target.value.trimStart() }));
   setErrores({ ...errores, [e.target.name]: "" });
  
 };
@@ -77,13 +77,15 @@ const handleSubmit = async e => {
 
       <div className="form-group">
         <label>DNI:</label>
-        <input name="dni" value={form.dni} onChange={handleChange} />
+        <input name="dni" value={form.dni} onChange={handleChange} type="text"
+          placeholder="Ej: 12345678" />
         {errores.dni && <span className="error">{errores.dni}</span>}
       </div>
 
       <div className="form-group">
         <label>Matrícula:</label>
-        <input name="matricula" value={form.matricula} onChange={handleChange} />
+        <input name="matricula" value={form.matricula} onChange={handleChange} type="text"
+        placeholder="Ej: M.P 12345"/>
         {errores.matricula && <span className="error">{errores.matricula}</span>}
       </div>
 
